@@ -7,7 +7,6 @@ const nodemailer = require("nodemailer");
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -22,7 +21,6 @@ const jwtCheck = jwt({
   issuer: `https://${process.env.AUTH0_DOMAIN}/`,
   algorithms: ["RS256"],
   getToken: (req) => {
-    // Check headers first
     if (
       req.headers.authorization &&
       req.headers.authorization.split(" ")[0] === "Bearer"
@@ -37,21 +35,19 @@ const jwtCheck = jwt({
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    type: "LOGIN", // Explicitly specify authentication type
+    type: "LOGIN",
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   tls: {
-    rejectUnauthorized: false, // For development only
+    rejectUnauthorized: false,
   },
 });
 
-// Auth Callback Endpoint
 app.post("/auth/callback", jwtCheck, async (req, res) => {
   try {
     const { token, email } = req.body;
 
-    // Send Email
     const mailOptions = {
       from: `Auth Service <${process.env.EMAIL_USER}>`,
       to: email,
@@ -73,8 +69,6 @@ app.post("/auth/callback", jwtCheck, async (req, res) => {
   }
 });
 
-// console.log(req.auth);
-
 app.use(
   cors({
     origin: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000",
@@ -83,7 +77,6 @@ app.use(
   })
 );
 
-// Start Server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
